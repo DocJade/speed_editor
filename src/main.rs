@@ -89,6 +89,19 @@ enum SpeedEditorLed {
 	AudioOnly	= (1 << 17),
 }
 
+// # The LEDs for the Jog mode button are on a different system ...
+// # Setting those leds is done with SET_REPORT on Output Report ID 4
+// # which takes a single 8 bits bitfield of the LEDs to enable
+
+// i know some of these words.
+
+enum SpeedEditorJogLed {
+    // bottom right cluster
+    Jog			= (1 <<  0),
+	Shtl		= (1 <<  1),
+	Scrl		= (1 <<  2),
+}
+
 fn main() {
     println!("Hello, world!");
 }
