@@ -103,10 +103,70 @@ enum SpeedEditorJogLed {
 }
 
 enum SpeedEditorJogMode {
-    RELATIVE_0			= 0,		// # Rela
-	ABSOLUTE_CONTINUOUS	= 1,		// # Send an "absolute" position (based on the position when mode was set) -4096 -> 4096 range ~ half a turn
-	RELATIVE_2			= 2,		// # Same as mode 0 ?
-	ABSOLUTE_DEADZERO	= 3,		// # Same as mode 1 but with a small dead band around zero that maps to 0
+    Relative0			= 0,		// # Rela
+	AbsoluteContinuous	= 1,		// # Send an "absolute" position (based on the position when mode was set) -4096 -> 4096 range ~ half a turn
+	Relative2			= 2,		// # Same as mode 0 ?
+	AbsoluteDeadzero	= 3,		// # Same as mode 1 but with a small dead band around zero that maps to 0
+}
+
+// now we have the function that authenticates the speed editor
+
+fn bmd_kbd_auth(challenge: u64) -> u64 {
+
+    // sadly the auth implementation isn't commented, so i have no idea
+    // how it works.
+
+    fn rol8(v: u64) -> u64 {
+        (v << 56) | (v >> 8)
+    }
+
+    fn rol8n(v: u64, n: u64) -> u64 {
+        let mut mut_v = v;
+        for _ in 0..n {
+            mut_v = rol8(mut_v)
+        }
+        mut_v
+    }
+
+    const AUTH_EVEN_TBL: [u64; 8] = [
+        0x3ae1206f97c10bc8,
+        0x2a9ab32bebf244c6,
+        0x20a6f8b8df9adf0a,
+        0xaf80ece52cfc1719,
+        0xec2ee2f7414fd151,
+        0xb055adfd73344a15,
+        0xa63d2e3059001187,
+        0x751bf623f42e0dde
+    ];
+
+    const AUTH_ODD_TBL: [u64; 8] = [
+        0x3e22b34f502e7fde,
+		0x24656b981875ab1c,
+		0xa17f3456df7bf8c3,
+		0x6df72e1941aef698,
+		0x72226f011e66ab94,
+		0x3831a3c606296b42,
+		0xfd7ff81881332c89,
+		0x61a3f6474ff236c6,
+    ];
+
+    const MASK: u64 = 0xa79a63f585d37bf0;
+
+    let n: u64 = challenge & 7;
+    let mut v: u64 = rol8n(challenge, n);
+    let k: u64;
+
+    if (v & 1) == ((0x78 >> n) & 1){
+        k = AUTH_EVEN_TBL[n as usize];
+    }
+    else {
+        v = v ^ rol8(v);
+		k = AUTH_ODD_TBL[n as usize];
+    }
+
+    v ^ (rol8(v) & MASK) ^ k
+
+
 }
 
 fn main() {
