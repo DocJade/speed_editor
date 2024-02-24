@@ -1,5 +1,12 @@
 // The resolve speed editor is pointlessly locked down, let's make it useful again.
 
+
+// # Key Presses are reported in Input Report ID 4 as an array of 6 LE16 keycodes
+// # that are currently being held down. 0x0000 is no key. No auto-repeat, no hw
+// # detection of the 'fast double press'. Every time the set of key being held
+// # down changes, a new report is sent.
+
+// no auto repeat is nice
 enum SpeedEditorKey {
     None = 0x00,
     // top left cluster
@@ -51,6 +58,35 @@ enum SpeedEditorKey {
     VideoOnly = 0x25,
     AudioOnly = 0x26,
     StopPlay = 0x3c,
+}
+
+// # Setting the leds is done with SET_REPORT on Output Report ID 2
+// # which takes a single LE32 bitfield of the LEDs to enable
+
+// I like your funny words magic man.
+enum SpeedEditorLed {
+    // top left cluster
+	CloseUp	= (1 <<  0),
+    // bottom left cluster
+	Cut			= (1 <<  1),
+	Dis			= (1 <<  2),
+	SmthCut	= (1 <<  3),
+    // middle top cluster
+	Trans		= (1 <<  4),
+	Snap		= (1 <<  5),
+    // middle bottom cluster
+	Cam7		= (1 <<  6),
+	Cam8		= (1 <<  7),
+	Cam9		= (1 <<  8),
+	LiveOwr	= (1 <<  9),
+	Cam4		= (1 << 10),
+	Cam5		= (1 << 11),
+	Cam6		= (1 << 12),
+	VideoOnly	= (1 << 13),
+	Cam1		= (1 << 14),
+	Cam2		= (1 << 15),
+	Cam3		= (1 << 16),
+	AudioOnly	= (1 << 17),
 }
 
 fn main() {
