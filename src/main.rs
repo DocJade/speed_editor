@@ -169,6 +169,30 @@ fn bmd_kbd_auth(challenge: u64) -> u64 {
 
 }
 
+// now onto the editor "class"-es
+
+struct Battery {
+    charging: bool,
+    level: u8, // 0-100
+}
+
+struct SpeedEditorHandler{
+    jog: SpeedEditorJogMode,
+    key: Vec<SpeedEditorKey>,
+    battery: Battery,
+}
+
+struct SpeedEditor{
+    usb_vid: u64,
+    usb_pid: u64,
+}
+
+impl SpeedEditor {
+    //todo
+}
+
+
+
 fn main() {
     println!("Hello, world!");
 }
