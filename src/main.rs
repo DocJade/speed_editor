@@ -1,5 +1,8 @@
 // The resolve speed editor is pointlessly locked down, let's make it useful again.
 
+use std::collections::HashSet;
+
+use rusb::*;
 
 // # Key Presses are reported in Input Report ID 4 as an array of 6 LE16 keycodes
 // # that are currently being held down. 0x0000 is no key. No auto-repeat, no hw
@@ -171,26 +174,58 @@ fn bmd_kbd_auth(challenge: u64) -> u64 {
 
 // now onto the editor "class"-es
 
-struct Battery {
-    charging: bool,
-    level: u8, // 0-100
+trait SpeedEditorHandler {
+    fn jog(&mut self, mode: SpeedEditorJogMode, value: i32);
+    fn key(&mut self, keys: Vec<SpeedEditorKey>);
+    fn battery(&mut self, charging: bool, level: u8);
 }
 
-struct SpeedEditorHandler{
-    jog: SpeedEditorJogMode,
-    key: Vec<SpeedEditorKey>,
-    battery: Battery,
-}
+const VENDOR_ID: u16 = 0x1edb;
+const PRODUCT_ID: u16 = 0xda0e;
 
 struct SpeedEditor{
-    usb_vid: u64,
-    usb_pid: u64,
+    device: Device<rusb::Context>,
+    handler: Box<dyn SpeedEditorHandler>,
 }
+
+struct MySpeedEditorHandler {
+    pressed_keys: HashSet<SpeedEditorKey>,
+}
+
+impl SpeedEditorHandler for MySpeedEditorHandler {
+    fn jog(&mut self, _mode: SpeedEditorJogMode, _value: i32) {
+        // Implement logic to handle jog wheel movement, e.g., printing a message
+        println!("Jog wheel rotated in mode {:?} with value {}", _mode, _value);
+    }
+
+    fn key(&mut self, keys: Vec<SpeedEditorKey>) {
+        // Update the pressed keys and implement logic based on pressed/released keys
+        self.pressed_keys.extend(keys.iter().cloned());
+        let mut pressed_key_names = Vec::new();
+        for key in self.pressed_keys.iter() {
+            pressed_key_names.push(format!("{:?}", key));
+        }
+        println!("Keys pressed: {:?}", pressed_key_names);
+    }
+
+    fn battery(&mut self, _charging: bool, _level: u8) {
+        // Implement logic to handle battery status changes, e.g., printing a message
+        println!("Battery charging: {}, level: {}", _charging, _level);
+    }
+}
+
 
 impl SpeedEditor {
-    //todo
-}
+    fn new(context: rusb::Context) -> Result<Self> {
+        let context = Context::new().unwrap();
 
+        let device = context.open_device_with_vid_pid(VENDOR_ID, PRODUCT_ID).unwrap().device();
+
+
+        let device_handle = device.open()?;
+        let interface = device_handle.active_configuration()?.interface(0)?;
+    }
+}
 
 
 fn main() {
