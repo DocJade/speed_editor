@@ -18,6 +18,6 @@ if __name__ == '__main__':
     import random
     import time
     while True:
-        time.sleep(1)
+        time.sleep(0.5)
         se.set_leds(random.getrandbits(18))
         se.set_jog_leds(random.getrandbits(3))
